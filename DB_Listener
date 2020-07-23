@@ -8,7 +8,7 @@ from datetime import datetime
 # If 2 tickets are opened at the same timestamp (10s window) only 1 ticket will be triggered.
 # Try and minimize iteration time to 0.5 seconds
 
-serverPath = '//ger\ec\proj\ha\IML/Users\HDMx\Sahar/query.txt'
+serverPath = DELETED FOR REVIEW PURPOSES
 s = sched.scheduler(time.time, time.sleep)
 counter = 0
 
