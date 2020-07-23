@@ -1,0 +1,145 @@
+import pyodbc
+import sched, time
+import os
+from datetime import datetime
+
+### NOTES: ###
+
+# If 2 tickets are opened at the same timestamp (10s window) only 1 ticket will be triggered.
+# Try and minimize iteration time to 0.5 seconds
+
+serverPath = '//ger\ec\proj\ha\IML/Users\HDMx\Sahar/query.txt'
+s = sched.scheduler(time.time, time.sleep)
+counter = 0
+
+# desktopPath = 'C:\Users\saharsa\Desktop/query.txt'
+
+#######################################################################################################################
+
+print ("Attempting to connect to database please wait...")
+
+def init_db(): # Connect to database
+
+     a_cnxn = pyodbc.connect(
+         r'Driver={SQL Server};Server=fm6vsql433.amr.corp.intel.com,3180;Database=GEDI_HVC;UID=mpa_admin;PWD=MPA^!Admin')
+
+     a_cursor = a_cnxn.cursor()
+
+     return a_cnxn, a_cursor
+
+#######################################################################################################################
+
+def fetch_single_value(_cursor, query):  # Fetch query values through row engine
+
+    try:
+        _cursor.execute(query)
+        row = _cursor.fetchone() # Gets Query
+
+        # print row[:]
+
+        if row is None:
+            return '0'
+            # return row[0].encode('ascii', 'ignore').decode('ascii')
+        return row
+
+    except (pyodbc.OperationalError, pyodbc.ProgrammingError), msg:
+        print 'pyodbc exception:  OperationalError, ProgrammingError\n'
+        return 'NA1'
+
+    except pyodbc.Error, msg:
+        print 'pyodbc exception:  ' + msg[0] + '\n\n' + msg[1]
+        return 'NA2'
+
+#######################################################################################################################
+
+def generate_tester_list(cursor):  # Store query data inside query variable
+
+    global query_text
+
+# Displays all relevant columns -- Variables taken from SQL Script in HeidiSQL
+
+    query_text = \
+        "SELECT TaskID, MachineType, StartDateTime, Status, Cell Name, Machine Type, ISNULL(LastWorkLog, 'Nothing') " \
+        "AS 'WorkLog', LastProblemDescription AS 'Problem' " \
+                 "from GediTaskFullData_V gt " \
+                 "where (Lab like '%HVC_CMT_MAINT%') " \
+                 "order by TaskID DESC"
+
+
+    return fetch_single_value(cursor, query_text)
+
+#######################################################################################################################
+
+def main(sc):  # convert.. compare..trigger and loop..
+
+    global counter
+
+    now = datetime.now()  # Get OS time each iteration
+    # dd/mm/YY H:M:S
+    dt_string = now.strftime("%H:%M:%S")
+
+    if __name__ == "__main__":
+        (cnxn, cursor) = init_db()
+
+        list = generate_tester_list(cursor)
+        list = str(list)
+
+        # listArr = generate_tester_list
+        # listArr = list[list]
+        #
+        # print (listArr(1))
+        #
+
+
+    print ""
+    print("\n######################## Starting New Iteration:", dt_string, "########################")
+
+    listID = list[1:6]  # Place string inside dict - print only the 1st and 2nd variables.
+
+    print ("\nTicket ID:")
+    print (list)
+
+    # print "\nCurrent Ticket ID:"
+    # print listID
+
+    with open(serverPath, "r") as fileRead:
+
+        file = fileRead.read()
+        # print file[1:6]
+        fileID = file[1:6]
+        print "\nLast Query ID:"
+        print fileID
+        # fileID = fileRead[1:6]
+        # print fileID
+
+    if fileID == listID:
+
+        print"\nNo New Entries\n"
+
+        print("Tickets opened while running: ")
+        print""
+        print("[", counter, "]")
+
+    else:
+
+        counter = counter + 1
+        with open(serverPath, "w") as storedFile:
+            storedFile.write(list)
+
+        # with open(serverPath, "a") as storedFile:
+
+
+            print("\nTickets opened while running:\n")
+
+            print("\n[", counter, "]\n")
+
+        print "\n#### NEW ENTRY FOUND ####\n- Saving Data...\n"
+
+        print "New Data Stored\n"
+
+    s.enter(1, 1, main, (sc,))  # runs function in loop using sched (time in sec, priority, arg, (kwarg))
+
+s.enter(1, 1, main, (s,))
+s.run()
+
+# sched.__all__(delay_seconds=5)  # Traceback error cannot run list
