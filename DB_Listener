@@ -12,7 +12,7 @@ serverPath = '//ger\ec\proj\ha\IML/Users\HDMx\Sahar/query.txt'
 s = sched.scheduler(time.time, time.sleep)
 counter = 0
 
-# desktopPath = 'C:\Users\saharsa\Desktop/query.txt'
+# desktopPath = DELETED FOR REVIEW PURPOSES
 
 #######################################################################################################################
 
@@ -21,7 +21,7 @@ print ("Attempting to connect to database please wait...")
 def init_db(): # Connect to database
 
      a_cnxn = pyodbc.connect(
-         r'Driver={SQL Server};Server=fm6vsql433.amr.corp.intel.com,3180;Database=GEDI_HVC;UID=mpa_admin;PWD=MPA^!Admin')
+         r'Driver={SQL Server};Server=DELETED FOR REVIEW PURPOSES')
 
      a_cursor = a_cnxn.cursor()
 
@@ -84,17 +84,9 @@ def main(sc):  # convert.. compare..trigger and loop..
         list = generate_tester_list(cursor)
         list = str(list)
 
-        # listArr = generate_tester_list
-        # listArr = list[list]
-        #
-        # print (listArr(1))
-        #
-
-
-    print ""
     print("\n######################## Starting New Iteration:", dt_string, "########################")
 
-    listID = list[1:6]  # Place string inside dict - print only the 1st and 2nd variables.
+    listID = list[1:6]  # Place ListID inside dict - print only the 1st and 2nd variables.
 
     print ("\nTicket ID:")
     print (list)
@@ -117,7 +109,6 @@ def main(sc):  # convert.. compare..trigger and loop..
         print"\nNo New Entries\n"
 
         print("Tickets opened while running: ")
-        print""
         print("[", counter, "]")
 
     else:
